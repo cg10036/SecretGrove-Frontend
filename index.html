@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SecretGrove</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .list-group-item {
+            cursor: pointer;
+        }
+
+        .selected-chat {
+            background-color: #f0f0f0;
+            /* Or any color you prefer */
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body style="padding: 10px">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Chat List (Left) -->
+            <div class="col-md-4 border-end">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2>Chat List</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newRoomModal">+</button>
+                </div>
+                <ul id="roomList" class="list-group">
+                    <!-- <li class="list-group-item selected-chat" onclick="alert('hi')">
+                        <strong>John Doe</strong><br>
+                        Hey, are you coming tonight? <span class="badge bg-primary">2</span>
+                    </li>
+                    <li class="list-group-item" onclick="alert('hi')">
+                        <strong>Jane Smith</strong><br>
+                        I'll send the report by tomorrow. <span class="badge bg-primary">5</span>
+                    </li> -->
+                    <!-- Add more chats here -->
+                </ul>
+            </div>
+
+            <!-- Chat Conversation (Right) -->
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 id="chatname"></h2>
+                    <div>
+                        <button class="btn btn-secondary me-2">Close</button> <!-- Close button -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                Options
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item" data-bs-toggle="modal"
+                                        data-bs-target="#deleteRoomModal">Delete Chat</a></li>
+                                <!-- More options can be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="chatBox" class="overflow-auto" style="height: 450px; word-wrap: break-word;">
+                    <!-- Chat messages will be here -->
+                    <!-- <p><strong>John Doe:</strong> Hi, how are you?</p>
+                    <p><strong>You:</strong> I'm good, thanks! And you?</p>
+                    <p><strong>John Doe:</strong> I'm doing well. Getting ready for the weekend.</p> -->
+                    <!-- More messages -->
+                </div>
+                <div class="mt-3 d-flex">
+                    <input id="content" type="text" class="form-control me-2" placeholder="Type a message...">
+                    <button id="send" class="btn btn-primary">Send</button> <!-- Send button -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newRoomModal" tabindex="-1" aria-labelledby="newRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newRoomModalLabel">New Chat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" placeholder="Enter chat name...">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="newRoomButton" type="button" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteRoomModal" tabindex="-1" aria-labelledby="deleteRoomModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteRoomModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this chat?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="deleteRoomButton" type="button" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const a = require("./index");
+        function selectRoom(id) {
+            a.selectRoom(id);
+        }
+        function deleteChat(id) {
+            a.deleteChat(id);
+        }
+    </script>
+</body>
+
+</html>

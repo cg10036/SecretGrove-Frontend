@@ -1,0 +1,21 @@
+{
+  "name": "secretgrove-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "dependencies": {
+    "elliptic": "^6.5.4",
+    "node-rsa": "^1.1.1",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.15.1"
+  }
+}
