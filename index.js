@@ -180,6 +180,10 @@ const connect = () => {
         case "del-room":
           console.log("del-room");
           db.run(`DELETE FROM room WHERE id = ?;`, [message.d.roomId], () => {
+            if (roomid === message.d.roomId) {
+              roomid = 0;
+            }
+            updateChat();
             updateRoom();
           });
           break;
@@ -334,14 +338,18 @@ const sendChat = async () => {
     let json = await resp.json();
     db.run(
       `INSERT INTO chat ("id", "room_id", "message", "from") VALUES (?, ?, ?, ?);`,
-      [json.id, roomid, msg, RSAPUBKEY]
+      [json.id, roomid, msg, RSAPUBKEY],
+      () => {
+        updateChat();
+      }
     );
-    updateChat();
   });
 };
 
 const deleteChat = async (id) => {
-  db.run(`DELETE FROM chat WHERE id = ?;`, [id]);
+  db.run(`DELETE FROM chat WHERE id = ?;`, [id], () => {
+    updateChat();
+  });
   await fetch("http://localhost:3000/api/chat", {
     method: "DELETE",
     headers: {
@@ -353,7 +361,6 @@ const deleteChat = async (id) => {
       sign: "sign",
     }),
   });
-  updateChat();
 };
 
 document.querySelector("#newRoomButton").onclick = async () => {
