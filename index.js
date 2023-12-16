@@ -42,7 +42,6 @@ const updateRoom = () => {
     let roomList = document.querySelector("#roomList");
     roomList.innerHTML = "";
     for (let row of rows) {
-      console.log(row);
       roomList.innerHTML += `<li class="list-group-item ${
         roomid === row.id ? "selected-chat" : ""
       }" onclick="selectRoom(${row.id});">
@@ -69,7 +68,6 @@ const updateChat = () => {
       let chatList = document.querySelector("#chatBox");
       chatList.innerHTML = "";
       for (let row of rows) {
-        console.log(row);
         chatList.innerHTML += `<p><strong>${row.from.slice(
           -12,
           -2
@@ -105,7 +103,6 @@ const connect = () => {
     try {
       message = textDecoder.decode(message);
       message = JSON.parse(message);
-      console.log(message);
       switch (message.c) {
         case "chat":
           console.log("chat");
@@ -126,6 +123,8 @@ const connect = () => {
               let tmp = Buffer.from(row.key, "base64");
               const key = tmp.slice(16);
               const iv = tmp.slice(0, 16);
+              console.log("key: " + key.toString("base64"));
+              console.log("iv: " + iv.toString("base64"));
               const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
               let decrypted = decipher.update(
                 message.d.message,
@@ -134,7 +133,7 @@ const connect = () => {
               );
               decrypted += decipher.final("utf-8");
               message.d.message = decrypted.toString("utf8");
-              console.log(message);
+              console.log("Decrypted message: " + message.d.message);
               db.run(
                 `INSERT INTO chat ("id", "room_id", "message", "from") VALUES (?, ?, ?, ?);`,
                 [
@@ -152,12 +151,21 @@ const connect = () => {
           break;
         case "room":
           console.log("room");
-          console.log(message);
-          let key = RSAKEY.decrypt(message.d.key, "base64");
-          console.log(key);
+          let deckey = RSAKEY.decrypt(message.d.key, "base64");
+          let tmp = Buffer.from(deckey, "base64");
+          const key = tmp.slice(16);
+          const iv = tmp.slice(0, 16);
+          console.log("Decrypted key: " + key.toString("base64"));
+          console.log("Decrypted iv: " + iv.toString("base64"));
           db.run(
             `INSERT INTO room ("id", "name", "to", "from", "key") VALUES (?, ?, ?, ?, ?);`,
-            [message.d.id, message.d.name, message.d.to, message.d.from, key],
+            [
+              message.d.id,
+              message.d.name,
+              message.d.to,
+              message.d.from,
+              deckey,
+            ],
             () => {
               updateRoom();
             }
@@ -215,11 +223,17 @@ const newRoom = async () => {
   const key = crypto.randomBytes(32);
   const iv = crypto.randomBytes(16);
 
+  console.log("Generated key: " + key.toString("base64"));
+  console.log("Generated iv: " + iv.toString("base64"));
+
   let tmp = new NodeRSA();
   tmp.importKey(
     "-----BEGIN PUBLIC KEY-----\n" + input.value + "\n-----END PUBLIC KEY-----",
     "public"
   );
+
+  let finalkey = tmp.encrypt(Buffer.concat([iv, key]), "base64");
+  console.log("Encrypted key: " + finalkey);
 
   let name = genName();
   let resp = await fetch("http://localhost:3000/api/room", {
@@ -231,11 +245,10 @@ const newRoom = async () => {
       name,
       to: input.value,
       from: RSAPUBKEY,
-      key: tmp.encrypt(Buffer.concat([iv, key]), "base64"),
+      key: finalkey,
     }),
   });
   let json = await resp.json();
-  console.log(json);
 
   db.run(
     `INSERT INTO room ("id", "name", "to", "from", "key") VALUES (?, ?, ?, ?, ?);`,
@@ -245,16 +258,17 @@ const newRoom = async () => {
       input.value,
       RSAPUBKEY,
       Buffer.concat([iv, key]).toString("base64"),
-    ]
+    ],
+    () => {
+      newRoomModal.hide();
+      cancelButton.removeAttribute("disabled");
+      confirmButton.innerHTML = "Confirm";
+      confirmButton.removeAttribute("disabled");
+      input.removeAttribute("disabled");
+      input.value = "";
+      updateRoom();
+    }
   );
-
-  newRoomModal.hide();
-  cancelButton.removeAttribute("disabled");
-  confirmButton.innerHTML = "Confirm";
-  confirmButton.removeAttribute("disabled");
-  input.removeAttribute("disabled");
-  input.value = "";
-  updateRoom();
 };
 const deleteRoom = async () => {
   let deleteRoomModal = bootstrap.Modal.getInstance(
@@ -294,14 +308,16 @@ const deleteRoom = async () => {
 const sendChat = async () => {
   let msg = document.querySelector("#content").value;
   db.get(`SELECT * FROM room WHERE id = ?;`, [roomid], async (err, row) => {
-    console.log(row);
     let tmp = Buffer.from(row.key, "base64");
     const key = tmp.slice(16);
     const iv = tmp.slice(0, 16);
     const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+    console.log("key: " + key.toString("base64"));
+    console.log("iv: " + iv.toString("base64"));
     let encrypted = cipher.update(msg, "utf8", "base64");
     encrypted += cipher.final("base64");
     v = encrypted.toString("utf8");
+    console.log("Encrypted message: " + v);
     let resp = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
@@ -314,7 +330,6 @@ const sendChat = async () => {
       }),
     });
     let json = await resp.json();
-    console.log(json);
     db.run(
       `INSERT INTO chat ("id", "room_id", "message", "from") VALUES (?, ?, ?, ?);`,
       [json.id, roomid, msg, RSAPUBKEY]
