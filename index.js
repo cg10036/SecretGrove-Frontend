@@ -296,6 +296,7 @@ const deleteRoom = async () => {
       sign: "sign",
     }),
   });
+  roomid = 0;
 
   deleteRoomModal.hide();
   cancelButton.removeAttribute("disabled");
@@ -303,6 +304,7 @@ const deleteRoom = async () => {
   deleteButton.removeAttribute("disabled");
 
   updateRoom();
+  updateChat();
 };
 
 const sendChat = async () => {
