@@ -65,7 +65,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h2 id="chatname"></h2>
                     <div>
-                        <button class="btn btn-secondary me-2" onclick="selectRoom(0)">Close</button> <!-- Close button -->
+                        <button class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#keyDisplayModal">Show my key</button>
+                        <button class="btn btn-secondary me-2" onclick="selectRoom(0)">Close</button>
+                        <!-- Close button -->
                         <div class="btn-group">
                             <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-expanded="false">
@@ -133,6 +135,26 @@
         </div>
     </div>
 
+    <!-- Key Display Modal -->
+    <div class="modal fade" id="keyDisplayModal" tabindex="-1" aria-labelledby="keyDisplayModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="keyDisplayModalLabel">My Key</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="myKey" class="form-control" rows="5" readonly></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="copybutton" type="button" class="btn btn-primary" onclick="copyKeyToClipboard()">Copy Key</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const a = require("./index");
@@ -141,6 +163,14 @@
         }
         function deleteChat(id) {
             a.deleteChat(id);
+        }
+        function copyKeyToClipboard() {
+            navigator.clipboard.writeText(document.getElementById("myKey").value);
+            let b = document.querySelector("#copybutton");
+            b.innerText = "Copied!";
+            setTimeout(() => {
+                b.innerText = "Copy Key";
+            }, 500);
         }
     </script>
 </body>

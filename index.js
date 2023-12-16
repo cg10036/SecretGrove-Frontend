@@ -27,7 +27,8 @@ let ws,
 
 let RSAKEY = new NodeRSA({ b: 512 });
 let RSAPUBKEY = RSAKEY.exportKey("public").split("\n").slice(1, -1).join("");
-alert(RSAPUBKEY);
+// alert(RSAPUBKEY);
+document.querySelector("#myKey").value = RSAPUBKEY;
 let roomid = 0;
 
 const updateRoom = () => {
