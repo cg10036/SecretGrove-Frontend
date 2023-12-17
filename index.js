@@ -103,13 +103,14 @@ const connect = () => {
     try {
       message = textDecoder.decode(message);
       message = JSON.parse(message);
+      console.log(message);
       switch (message.c) {
         case "chat":
           console.log("chat");
           // get room data from db
           db.get(
             `SELECT * FROM room WHERE id = ?;`,
-            [message.d.roomId],
+            [message.d.chat.roomId],
             (err, row) => {
               if (err) {
                 console.log(err);
@@ -127,23 +128,30 @@ const connect = () => {
               console.log("iv: " + iv.toString("base64"));
               const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
               let decrypted = decipher.update(
-                message.d.message,
+                message.d.chat.message,
                 "base64",
                 "utf-8"
               );
               decrypted += decipher.final("utf-8");
-              message.d.message = decrypted.toString("utf8");
-              console.log("Decrypted message: " + message.d.message);
+              message.d.chat.message = decrypted.toString("utf8");
+              console.log("Decrypted message: " + message.d.chat.message);
               db.run(
                 `INSERT INTO chat ("id", "room_id", "message", "from") VALUES (?, ?, ?, ?);`,
                 [
-                  message.d.id,
-                  message.d.roomId,
-                  message.d.message,
-                  message.d.from,
+                  message.d.chat.id,
+                  message.d.chat.roomId,
+                  message.d.chat.message,
+                  message.d.chat.from,
                 ],
                 () => {
                   updateChat();
+                  ws.send(
+                    JSON.stringify({
+                      i: 1,
+                      c: "read",
+                      d: { token: message.d.token },
+                    })
+                  );
                 }
               );
             }
